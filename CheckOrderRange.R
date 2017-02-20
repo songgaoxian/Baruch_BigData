@@ -1,0 +1,137 @@
+getwd()
+setwd("/Users/user/Desktop/BigData9898")
+data<-read.csv("data-small.csv",header=F)
+data<-cbind(data,1:length(data[,1]))
+data<-data[order(data[,1]),]
+dist<-abs(data[,4]-1:length(data[,1]))
+print(mean(dist))
+print(median(dist))
+print(sd(dist))
+plot(1:length(data[,1]),dist,type="b",ylim=c(0,1300))
+#it seems that mostly, the distance between the wrong order and 
+#the correct order ranges from 0 to 1200 based on the plot
+#so it is Good Enough to set the block of 1200
+neg=data[data[,2]<=0,]
+small=data[data[,2]<10]
+n=length(data[,1])/100
+plot(1:n*100,data[1:n*100,2],type='l',ylim=c(0,3000))
+limited=data[data[,2]>0,]
+limited=limited[limited[,2]<2500,]
+n=length(limited[,2])
+logreturn=log(limited[2:n,2]/limited[1:n-1,2])
+logreturn=logreturn[!is.na(logreturn)]
+blocks=1
+end=blocks*5000
+start=blocks
+p<-c(0)
+while(end<length(logreturn)){
+  result<-shapiro.test(logreturn[start:end])
+  p<-c(p,result$p.value)
+  start=end+1
+  blocks=blocks+1
+  end=blocks*5000
+}
+result<-shapiro.test(logreturn[start:length(logreturn)])
+p<-c(p,result$p.value)
+plot(1:21,p)
+limited=limited[limited[,3]>=0,]
+limited=limited[limited[,3]>0,]
+n=length(limited[,1])
+logreturn=log(limited[2:n,2]/limited[1:n-1,2])
+logreturn=logreturn[!is.na(logreturn)]
+blocks=1
+end=blocks*5000
+start=blocks
+p<-c(0)
+while(end<length(logreturn)){
+  result<-shapiro.test(logreturn[start:end])
+  p<-c(p,result$p.value)
+  start=end+1
+  blocks=blocks+1
+  end=blocks*5000
+}
+plot(1:20,p)
+m<-mean(logreturn)
+s<-sd(logreturn)
+block_size=10000
+start=1
+end=block_size
+cor(logreturn[3:length(logreturn)],logreturn[1:(length(logreturn)-2)])
+select=c(TRUE)
+timestep=limited[,1]
+n=length(timestep)
+timestep=limited[,1]
+t=as.character.Date(timestep)
+t[1]<t[2]
+select2<- t[2:n]>t[1:n-1]
+select<-c(select,select2)
+finalp=limited[select,2]
+n=length(finalp)
+logreturn=log(finalp[2:n]/finalp[1:n-1])
+logreturn=logreturn[!is.na(logreturn)]
+plot(acf(logreturn),ylim=c(-0.2,0.2))
+block=1
+start=1
+end=block*5000
+p<-c(0)
+while(end<n){
+  result<- shapiro.test(logreturn[start:end])
+  p<-c(p,result$p.value)
+  start=end+1
+  block=block+1
+  end=5000*block
+}
+result<- shapiro.test(logreturn[start:n])
+p<-c(p,result$p.value)
+plot(acf(logreturn),ylim=c(-0.01,0.01))
+#very small autocorrelation
+m=mean(logreturn)
+s=sd(logreturn)
+bar=abs(qnorm(1/n))
+filtered<-0
+ini=T
+block_size=10000
+start=1
+end=block_size
+large_bar=abs(qnorm(5/99782))
+h=(large_bar-2)/2.0
+current_bar=large_bar
+while(current_bar>2.5){
+  large_bar<-c(current_bar-h,large_bar)
+  current_bar=current_bar-h
+}
+cumu_size=floor(abs(1-pnorm(large_bar))*99782)
+cumu_table=rep(0,length(cumu_size))
+filtered<-0
+for (i in 1:9){
+  m=mean(logreturn[start:end])
+  s=sd(logreturn[start:end])
+  target=logreturn[start:end]
+  for(j in 1:block_size){
+    r=abs(target[j]-m)/s
+    if(r<large_bar[1]){
+      filtered<-c(filtered,r)
+    }
+    else if(r<large_bar[2]){
+      cumu_table[2]=cumu_table[2]+1
+      if(cumu_table[2]<cumu_size[2]){
+        filtered<-c(filtered,r)
+      }
+    }
+    else if(r<large_bar[3]){
+      cumu_table[3]=cumu_table[3]+1
+      if(cumu_table[3]<cumu_size[3]){
+        filtered<-c(filtered,r)
+      }
+    }
+    else{
+      cumu_table[3]=cumu_table[3]+1
+      if(cumu_table[3]<cumu_size[3]){
+        filtered<-c(filtered,r)
+      }
+    }
+  }
+  start=end+1
+  end=end+block_size
+}
+plot(acf(filtered),ylim=c(-0.4,0.4))

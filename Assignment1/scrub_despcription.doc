@@ -1,0 +1,38 @@
+﻿----scrub.py----
+###job1.script is for the running of scrub.py ####
+Purpose: 
+Read data file, parse the data and separate all data into signal or noise
+
+How to use:
+1) In terminal, run "mpiexec -n num python scrub.py filename.txt"
+   Note: Replace num with some number to specify how many processes can run in    
+   parallel.
+   Replace filename with the name of the data file. The data file should be in same  
+   directory.
+2) In penzias, submit job1.script to run scrub.py.
+   Remember to load python/2.7_anaconda module.
+
+Configure scrub.py:
+In line 9, you can set on_profile to be True to turn on the profiler for scrub.
+At the end, info from profiler will be logged into log files
+In line 10, you can choose to use a sophisticated scrubbing algorithm or a simple one.
+If the sophisticated algorithm is selected, set use_sophisticated_scrub to True
+
+Data structure usage:
+I define an Analyzer class in analyzer.py. 
+After reading data to byte array buffer, I can construct an Analyzer object with the buffer.
+In the constructor, incorrectly formatted data will be filtered.
+Moreover, number of lines for 1 second will be calculated and set as the block size for ordering.
+In the method block_ordering, data will be ordered in blocks based on time.
+In the method filter_extremes, non-positive price or trade volume data will be filtered.
+In the method filter_max_corr, it removes local outliers if within a batch, the frequency of outliers is too high.
+Parameters are set by analysis in R to maximize autocorrelation with lag 1.
+Refer to OrderFilterAnalysis.R
+
+Trade_off:
+Order all data takes long time, but order data in blocks reduces time complexity to O(n).
+The block need only be large enough, so for simplicity, I just set it to the length of data for first second.
+
+Extra Remark:
+Data are read in blocks based on available RAM.
+In addition, noise and signals are written to files in batches

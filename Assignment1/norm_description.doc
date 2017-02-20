@@ -1,0 +1,26 @@
+﻿----normal.py----
+----normal_test.py----
+###job2.script is for running normal_test.py####
+Purpose: 
+Get time series data to test normality
+
+How to use:
+1) In terminal, run "mpiexec -n num python normal_test.py filename.txt"
+   Note: Replace num with some number to specify how many processes can run in 
+   parallel.
+   Replace filename with the name of the data file for analysis
+2) In penzia, submit job2.script to run normal_test.py
+
+Configure normal_test.py:
+In line 11, you can set on_profile to be True to turn on the profiler for normal test.
+At the end, info from profiler will be logged into log files.
+
+Data structure usage:
+I use numpy.array a lot for data communication across difference processes to collectively output moments.
+In normal.py, I define a class Normal_stat that accepts a time series of price or return to do some analysis. In constructor, moments are calculated and the class provides methods to return standard deviation, mean, skewness and kurtosis.
+Here I use Jarque_Bera test to test normality
+
+Trade_off & Extra Remark
+In the usual way to calculate sample deviation, sample kurtosis and sample skewness, we need first calculate sample mean and loop through the data again to get sample deviation, kurtosis and skewness. Instead, I design the code to loop through return series data only once to get all necessary moments for these statistics computation. For example, variance=E(X*X)-E(X)*E(X), so I approximate the sample variance as second moment – square of first moment. In large data set,
+the approximation is good enough. When I test it, I checked the difference between the approximated skewness (and kurtosis) and the exact one, which are close enough.
+

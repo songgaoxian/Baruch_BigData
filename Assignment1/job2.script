@@ -1,0 +1,8 @@
+#!/bin/bash
+#PBS -q production
+#PBS -N assignment12
+#PBS -V
+module load python/2.7.12_anaconda
+echo "job begin\n"
+cd $PBS_O_WORKDIR
+mpirun -np 16 python /scratch/song.gaoxian/2017-MATH-9898-Song-Gaoxian/Assignment1/normal_test.py signal.txt > m2.txt 2>&1

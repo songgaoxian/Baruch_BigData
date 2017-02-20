@@ -1,0 +1,8 @@
+#!/bin/bash
+#PBS -q interactive
+#PBS -N assignment1
+#PBS -V
+module load python/2.7.12_anaconda
+echo "job begin\n"
+cd $PBS_O_WORKDIR
+mpirun -np 2 python /scratch/song.gaoxian/2017-MATH-9898-Song-Gaoxian/Assignment1/scrub.py data-big.txt > m1.txt 2>&1
